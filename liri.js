@@ -44,7 +44,7 @@ switch (fileArgument) {
     //Prompt the user with instructions as a default message
 
     default:
-        console.log("************* Welcome to LIRI, the Node assistant **************" +
+        console.log("************* Welcome to LIRI, the Node assistant **************\n" +
             "\nLIRI can look up a song, movie, or Twitter account for you. \n--- Give it a try using one of the options below: ---\n" +
             "================================================================" +
             "\n --> Type 'spotify-this-song' and the song name in quotes, ex. 'Song Name'" +
@@ -130,72 +130,77 @@ function spotifyThisSong() {
 function movieThis() {
     var movie = userInput;
     if (!movie) {
-        movie = "Top Gun";
-        console.log("It appears you didn't enter a valid movie title, might I suggest the class Tom Cruise movie Top Gun?");
+        movie = "Caddyshack";
+        console.log("It looks like you selected a movie that doesn't exist or you spelled it incorrectly :) May I suggest the golf classic Caddyshack");
     }
     movieName = movie;
-    console.log(movieName);
     request("http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy", function (error, response, body) {
-        var movieObject = JSON.parse(body);
+        if (!error && response.statusCode == 200) {
+            var movieObject = JSON.parse(body);
+            var space = "\n" + "\n" + "\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0";
+            //console.log(movieObject); // Show the text in the terminal
+            var movieResults = " ----------------- LIRI Gathered Movie Data for you ----------------- \n" +
+                space + "Title: " + movieObject.Title +
+                space + "Year: " + movieObject.Year +
+                space + "Imdb Rating: " + movieObject.imdbRating +
+                space + "Country: " + movieObject.Country +
+                space + "Language: " + movieObject.Language +
+                space + "Rotten Tomatoes Rating: " + movieObject.tomatoRating +
+                space + "Rotten Tomatoes URL: " + movieObject.tomatoURL + "\n\n\n" +
+                space + "***[MORE INFO BELOW]*** \n\n\n" +
+                "\nActors: ===> " + movieObject.Actors + "\n" +
+                "\nPlot:  ===> " + movieObject.Plot + "\n";
 
-        var space = "\n" + "\n" + "\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0";
-
-        var movieResults = " ----------------- LIRI Gathered Movie Data for you ----------------- \n" +
-            space + "Title: " + movieObject.Title +
-            space + "Year: " + movieObject.Year +
-            space + "Imdb Rating: " + movieObject.imdbRating +
-            space + "Country: " + movieObject.Country +
-            space + "Language: " + movieObject.Language +
-            space + "Rotten Tomatoes Rating: " + movieObject.tomatoRating +
-            space + "Rotten Tomatoes URL: " + movieObject.tomatoURL + "\n\n\n" +
-            space + "***[MORE INFO BELOW]*** \n\n\n" +
-            "\nActors: ===> " + movieObject.Actors + "\n" +
-            "\nPlot:  ===> " + movieObject.Plot + "\n" +
-
-        fs.appendFile("log.txt", movieResults, function (error) {
-        if (error) throw error;
-        console.log("Movie saved in log.txt");
-        console.log(movieResults);
-        });
+            console.log(movieResults);
+            fs.appendFile("log.txt", movieResults, function (error) {
+                if (error) throw error;
+                console.log("Movie saved!");
+            });
+            // console.log(movieObject);
+        } else {
+            console.log("Error :" + error);
+            return;
+        }
     });
-    //Need to create the function for do-what-it-says user input
-
-    var arrayRandom = [];
-    function doWhatItSays() {
-
-        fs.readFile("random.txt", 'utf8', function (error, data) {
-            if (error) throw error;
-            // Rob and I found this one on the internet, but hey it works :)
-            loggedText = data.split(",");
-            console.log(loggedText);
-
-            var command;
-            var parameter;
-
-            command = loggedText[0];
-            parameter = loggedText[1];
-
-            parameter = parameter.replace('"', '');
-            parameter = parameter.replace('"', '');
-            // console.log(parameter);
-
-            switch (command) {
-                case 'my-tweets':
-                    userInput = parameter;
-                    myTweets();
-                    break;
-
-                case 'spotify-this-song':
-                    userInput = parameter;
-                    spotifyThisSong();
-                    break;
-
-                case 'movie-this':
-                    userInput = parameter;
-                    movieThis();
-                    break;
-            }
-        });
-
-    }
 }
+//Need to create the function for do-what-it-says user input
+
+var arrayRandom = [];
+function doWhatItSays() {
+
+    fs.readFile("random.txt", 'utf8', function (error, data) {
+        if (error) throw error;
+        // Rob and I found this one on the internet, but hey it works :)
+        loggedText = data.split(",");
+        console.log(loggedText);
+
+        var command;
+        var parameter;
+
+        command = loggedText[0];
+        parameter = loggedText[1];
+
+        parameter = parameter.replace('"', '');
+        parameter = parameter.replace('"', '');
+        // console.log(parameter);
+
+        switch (command) {
+            case 'my-tweets':
+                userInput = parameter;
+                myTweets();
+                break;
+
+            case 'spotify-this-song':
+                userInput = parameter;
+                spotifyThisSong();
+                break;
+
+            case 'movie-this':
+                userInput = parameter;
+                movieThis();
+                break;
+        }
+    });
+
+}
+
